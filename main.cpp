@@ -2,6 +2,7 @@
 
 
 using namespace std;
+using namespace std::chrono;
 
 #define pii pair<int,int>
 struct vessel_info{
@@ -26,7 +27,7 @@ int calCost(){
     return sum;
 }
 
-bool cmp(vessel_info &V1, vessel_info &V2){
+bool cmp1(vessel_info &V1, vessel_info &V2){
     if (V1.arrival_time < V2.arrival_time) return 1;
     else if (V1.arrival_time == V2.arrival_time) {
         return V1.weight < V2.weight;
@@ -34,9 +35,15 @@ bool cmp(vessel_info &V1, vessel_info &V2){
     else return 0;
 }
 
+bool cmp2(vessel_info &V1, vessel_info &V2){
+    if (V1.index < V2.index) return 1;
+    else return 0;
+}
+
 int berth_length;
 int m,n;
 set<int> berth_break;
+vector<int> br(1,0);
 int max_time = 0;
 
 //=============================
@@ -71,7 +78,7 @@ void deleteVector() {
 //=============================
 int di[4] = {0,-1,-1,0};
 int dj[4] = {-1,-1,0,0};
-int space[1001][1001];
+int space[2001][2001];
 map <string,pair<int,int>> dict;
 void create_dict() {
     dict["1000"] = {1,0};
@@ -195,8 +202,9 @@ void assignClass(string res, int i, int j) {
 }
 
 
-void sortVessel() {
-    sort(vessel.begin(),vessel.end(),cmp);
+void sortVessel(int opt) {
+    if (opt == 1) sort(vessel.begin(), vessel.end(), cmp1);
+    else sort(vessel.begin(), vessel.end(), cmp2);
 }
 
 int toInt(string str){
@@ -230,10 +238,10 @@ void decode(string str){
     vessel.push_back(V);
 }
 
-void read(){
+void read(string fileName){
     string data;
     ifstream ifs;
-    ifs.open("input1.txt");
+    ifs.open(fileName);
     // read berth length
     getline(ifs, data);
     ifs >> berth_length;
@@ -244,13 +252,14 @@ void read(){
     getline(ifs,data);
     while (data != ""){
         berth_break.insert(toInt(data));
+        br.push_back(toInt(data));
         getline(ifs,data);
     }
     getline(ifs, data);
     while (getline(ifs, data)){
         decode(data);
     }
-    
+    br.push_back(berth_length);
 }
 // tao diem moi tu 2 duong giao class 3
 void Class3Intesection(){
@@ -386,13 +395,47 @@ int generateCost2(vessel_info V){
     return idx;
 }
 
+int get_differ(int idx, int pos, int size) {
+    int direction = feasible_direction[idx];
+    int idx_up = upper_bound(br.begin(),br.end(),pos) - br.begin();
+    int idx_lb = idx_up - 1;
+    
+    if (direction == 1) { //up
+        if (br[idx_lb] == pos) {
+            idx_up -= 1;
+            idx_lb -= 1;
+        }
+    }
+    cout << "br: " << br[idx_up] << " " << br[idx_lb] << ' ' << br[idx_up] - br[idx_lb] - size << endl;
+    cout << "idx: " << idx_up << " " << idx_lb << endl;
+    return br[idx_up] - br[idx_lb] - size;
+}
+
+int generateCost3(vessel_info V){
+    int idx = 0, min = -1, k, dif;
+    //
+    min = V.weight*(feasible_solution[0].first-V.arrival_time);
+    
+    dif = get_differ(0,feasible_solution[0].second,V.size);
+    
+    for (int i = 1; i < feasible_solution.size(); ++i){
+        k = V.weight*(feasible_solution[i].first-V.arrival_time);
+        if (k < min){ min = k; idx = i; dif = get_differ(i,feasible_solution[i].second,V.size);}
+        else if (k == min){
+            int k_diff = get_differ(i,feasible_solution[i].second,V.size);
+            if (k_diff < dif) {dif = k_diff, idx = i;}
+        }
+    }
+    cout << "dif: " << dif << endl; 
+    return idx;
+}
+
 void fillColor(int idx,struct vessel_info V) {
     int direct = feasible_direction[idx];
     int vessel_size = V.size;
     int time_ = V.processing_time;
     int x = feasible_solution[idx].first;
     int y = feasible_solution[idx].second;
-    
     
     if (direct == 1) {
         for (int i = x; i < x + time_; ++i) {
@@ -437,8 +480,8 @@ void printMap1(){
 
 void process() {
     initLocation();
+    max_time = vessel[0].arrival_time;
     for (int k = 0; k < vessel.size(); ++k) {
-        cout << vessel[k].index << "------------------------" << endl;
         deleteVector();
         avt = vessel[k].arrival_time;
         for (int i = 0; i <= max_time; ++i) {
@@ -447,11 +490,11 @@ void process() {
                 assignClass(res,i,j);
             }
         } 
+        cout << "Class3:" << endl;
+        printPoint(Class3);
+        cout << "Class1:" << endl;
+        printPoint(Class1);
         generatorPoint();
-        // cout << "Class3:" << endl;
-        // printPoint(Class3);
-        // cout << "Class1:" << endl;
-        // printPoint(Class1);
         Class3Intesection();
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < Class1[i].size(); ++j) {
@@ -476,27 +519,48 @@ void process() {
         // for (int i = 0; i < feasible_solution.size(); ++i){
         //     cout << feasible_solution[i].first << ' ' << feasible_solution[i].second << ' ' << feasible_direction[i] << endl;
         // }
-        int idx = generateCost(vessel[k]);
+        //cout << k << "--------------------" << endl;
+        int idx = generateCost3(vessel[k]);
         
         //cout << "Set vessel at:" << idx << " " << feasible_solution[idx].first << " " << feasible_solution[idx].second << endl;
         
         fillColor(idx,vessel[k]);
         vessel[k].mooring_time = feasible_solution[idx].first;
+        if (feasible_direction[idx] == 1) vessel[k].position = feasible_solution[idx].second - vessel[k].size;
+        else vessel[k].position = feasible_solution[idx].second;
         //printMap1();
-        // cout << "hehe" << endl;
     }
-    printMap1();
+    //printMap1();
     cout << "cost: " << calCost() << endl;
 }
 
+void write(string fileName){
+    ofstream ofs;
+    ofs.open(fileName);
+    string open = "% Vessel index, mooring time $u_i$, starting berth position occupied $v_i$\n";
+    ofs << open;
+    for (int i = 0; i < vessel.size(); ++i){
+        ofs << vessel[i].index << ' ' << vessel[i].mooring_time << ' ' << vessel[i].position << endl;
+    }
+    ofs << endl << "Cost: " << calCost();
+    ofs.close();
+}
+
 int main(){
-    read();
-    //GRAPS construction phase
-    //step 1
-    sortVessel();
+    string fileIN, fileOUT;
+    fileIN = "input5.txt";
+    fileOUT = "output5.txt";
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    double elapsed_seconds;
+    start = std::chrono::system_clock::now();
+    read(fileIN);
+    sortVessel(1);
     create_dict();
     process();
-    //step 2
-
+    sortVessel(2);
+    write(fileOUT);
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = duration_cast<microseconds> (end - start).count() * pow(10, -6);
+    cout << "Time to processing: " << elapsed_seconds << "s\n";
     return 0;
 }
