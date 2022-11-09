@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 
+
 using namespace std;
 
 #define pii pair<int,int>
@@ -15,8 +16,6 @@ struct vessel_info{
             index(index), size(size), arrival_time(arrival_time), processing_time(processing_time), weight(weight) {};
 };
 
-
-
 bool cmp(vessel_info &V1, vessel_info &V2){
     if (V1.arrival_time < V2.arrival_time) return 1;
     else if (V1.arrival_time == V2.arrival_time) {
@@ -28,6 +27,7 @@ bool cmp(vessel_info &V1, vessel_info &V2){
 int berth_length;
 int m,n;
 set<int> berth_break;
+int max_time = 0;
 
 //=============================
 vector<vector<pii>> Class1;
@@ -42,11 +42,15 @@ int avt;
 
 void deleteVector() {
     Class1.clear();
+    Class1.resize(4);
     Class1new.clear();
+    Class1new.resize(4);
     feasible_solution.clear();
     feasible_prop.clear();
     Class3.clear();
+    Class3.resize(4);
     Class3_generator.clear();
+    Class3_generator.resize(4);
     cul_sum.clear();
     feasible_direction.clear();
     avt = 0;
@@ -74,6 +78,12 @@ void create_dict() {
 }
 //===============================
 //tim giao diem
+bool inBorder(int i,int j) {
+    if (i < avt || i > 1000) return false;
+    if (j < 0 || j > berth_length - 1) return false;
+    return true;
+}
+
 pair<int,int> intersection(pair<int,int>A, pair<int,int>B, pair<int,int>C, pair<int,int>D){
     pair<int, int> res = {-1, -1};
     if (A.second < C.second || A.second > D.second) return res;
@@ -83,14 +93,23 @@ pair<int,int> intersection(pair<int,int>A, pair<int,int>B, pair<int,int>C, pair<
     return res;
 }
 
-void initLocation(){
-    memset(space,0,sizeof(space));
+string identifyClass(int i, int j){
+    string res = "";
+    for (int k = 0; k < 4; ++k) {
+        int new_i = i + di[k];
+        int new_j = j + dj[k];
+        if (inBorder(new_i,new_j)) {
+            if (space[new_i][new_j] == 0) {
+                res += '1';
+            } else res += '0';
+        }
+        else res += '0';
+    }
+    return res;
 }
 
-bool inBorder(int i,int j) {
-    if (i < avt || i > 1000) return false;
-    if (j < 0 || j > 1000) return false;
-    return true;
+void initLocation(){
+    memset(space,0,sizeof(space));
 }
 
 void generatorPoint() {
@@ -154,23 +173,20 @@ void assignClass(string res, int i, int j) {
         if (cls == 1) Class1[idx].push_back({i,j});
         else Class3[idx].push_back({i,j});
     }
+    else if (berth_break.find(j) != berth_break.end()){
+        if (res == "1001" || res == "1011"){
+            Class1[1].push_back({i,j});
+        }
+        if (res == "1001" || res == "1101"){
+            Class1[3].push_back({i,j});
+        }
+        else if (res == "0110"){
+            Class1[0].push_back({i,j});
+            Class1[2].push_back({i,j});
+        }
+    }
 }
 
-string identifyClass(int i, int j){
-    string res = "";
-    int count = 0;
-    for (int k = 0; k < 4; ++k) {
-        int new_i = i + di[k];
-        int new_j = j + dj[k];
-        if (inBorder(new_i,new_j)) {
-            if (space[new_i][new_j] == 0) {
-                res += '1';
-            } else res += '0';
-        }
-        else res += '0';
-    }
-    return res;
-}
 
 void sortVessel() {
     sort(vessel.begin(),vessel.end(),cmp);
@@ -326,6 +342,7 @@ int generateCost(vessel_info V){
     for (int i = 0; i < feasible_solution.size(); ++i){
         sum += V.weight*(feasible_solution[i].second-V.arrival_time);
     }
+    if (sum == 0) return 0;
     for (int i = 0; i < feasible_solution.size(); ++i){
         int k = V.weight*(feasible_solution[i].second-V.arrival_time);
         if (i == 0) cul_sum.push_back(k * 1.0 / sum);
@@ -373,23 +390,39 @@ void fillColor(int idx,struct vessel_info V) {
             }
         }
     }
+    if (x + time_ > max_time) max_time = x + time_;
+}
+
+void printPoint(vector<vector<pii>> a){
+    for (int i = 0 ; i < 4; ++i)
+        for (int j = 0; j < a[i].size(); ++j)
+            cout << a[i][j].first << ' ' << a[i][j].second << endl;
+}
+
+void printMap(){
+    for (int i = 0; i < max_time; ++i){
+        for (int j = 0; j < berth_length; ++j) cout << space[i][j] << ' ';
+        cout << endl;
+    }
 }
 
 void process() {
-    for (int k = 0; k < vessel.size(); ++k) {
+    initLocation();
+    //for (int k = 0; k < vessel.size(); ++k) {
         deleteVector();
-        avt = vessel[k].arrival_time;
-        for (int i = 0; i <= 1000; ++i) {
-            for (int j = 0; j <= 1000; ++j) {
+        avt = vessel[0].arrival_time;
+        for (int i = 0; i <= max_time; ++i) {
+            for (int j = 0; j <= berth_length; ++j) {
                 string res = identifyClass(i,j);
                 assignClass(res,i,j);
             }
         }
+        //printPoint(Class1);
         generatorPoint();
         Class3Intesection();
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < Class1[i].size(); ++j) {
-                bool check_loc = checkLocation(Class1[i][j],i+1,vessel[k].size,vessel[k].processing_time);
+                bool check_loc = checkLocation(Class1[i][j],i+1,vessel[0].size,vessel[0].processing_time);
                 if (check_loc) {
                     feasible_solution.push_back(Class1[i][j]);
                     feasible_direction.push_back(i+1);
@@ -398,16 +431,17 @@ void process() {
         }
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < Class1new[i].size(); ++j) {
-                bool check_loc = checkLocation(Class1new[i][j],i+1,vessel[k].size,vessel[k].processing_time);
+                bool check_loc = checkLocation(Class1new[i][j],i+1,vessel[0].size,vessel[0].processing_time);
                 if (check_loc) {
                     feasible_solution.push_back(Class1new[i][j]);
                     feasible_direction.push_back(i+1);
                 } 
             } 
         }
-        int idx = generateCost(vessel[k]);
-        fillColor(idx,vessel[k]);
-    }
+        int idx = generateCost(vessel[0]);
+        fillColor(idx,vessel[0]);
+        printMap();
+    //}
 }
 
 int main(){
@@ -415,6 +449,8 @@ int main(){
     //GRAPS construction phase
     //step 1
     sortVessel();
+    create_dict();
+    process();
     //step 2
 
     return 0;
