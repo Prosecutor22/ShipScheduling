@@ -519,7 +519,6 @@ void process() {
         // for (int i = 0; i < feasible_solution.size(); ++i){
         //     cout << feasible_solution[i].first << ' ' << feasible_solution[i].second << ' ' << feasible_direction[i] << endl;
         // }
-        //cout << k << "--------------------" << endl;
         int idx = generateCost3(vessel[k]);
         
         //cout << "Set vessel at:" << idx << " " << feasible_solution[idx].first << " " << feasible_solution[idx].second << endl;
@@ -542,14 +541,14 @@ void write(string fileName){
     for (int i = 0; i < vessel.size(); ++i){
         ofs << vessel[i].index << ' ' << vessel[i].mooring_time << ' ' << vessel[i].position << endl;
     }
-    ofs << endl << "Cost: " << calCost();
+    cout << "Cost: " << calCost();
     ofs.close();
 }
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "input5.txt";
-    fileOUT = "output5.txt";
+    fileIN = "input2.txt";
+    fileOUT = "output2.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
