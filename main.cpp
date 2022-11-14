@@ -60,8 +60,9 @@ int avt;
 void deleteVector() {
     Class1.clear();
     Class1.resize(4);
-    Class1new.clear();
-    Class1new.resize(4);
+    //Class1new.clear();
+    // Class1new.erase(Class1new.begin(), Class1new.end());
+    //Class1new.resize(4);
     feasible_solution.clear();
     feasible_prop.clear();
     Class3.clear();
@@ -151,11 +152,15 @@ void generatorPoint() {
             }
             else if (i == 2){
                 int flag = 1;
+                cout << x << ' ' << y << " ==== bugs0 =====" << endl;
                 while (y < berth_length && space[x][y] == 0){
                     y++;
+                    
                     if (berth_break.find(y) != berth_break.end()) {flag = 0; break;}
                 }
+                cout << x << ' ' << y << " ==== bugs0 =====" << endl;
                 Class1[3].push_back({x, y - flag});
+                cout << Class1[3].size() << endl;
                 Class3_generator[2].push_back({x, y - flag});
             }
             else {
@@ -166,6 +171,7 @@ void generatorPoint() {
                 Class3_generator[3].push_back({x + 1, y});
             }
         }
+        
     }
 }
 
@@ -301,9 +307,37 @@ bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
         }
     }
     else if (quadrant == 2) {
+        // for (int i = x; i > x - time; --i) {
+        //     for (int j = y; j > y - vessel_size; j--) {
+        //         if (berth_break.find(j) != berth_break.end()) {
+        //             if (y - vessel_size < j) {
+        //                 flag = false;
+        //                 break;
+        //             }
+        //         }
+        //         if (space[i][j] > 0) {
+        //             flag = false;
+        //             break;
+        //         }
+        //     }
+        // }
         return false;
     }
     else if (quadrant == 3) {
+        // for (int i = x; i > x - time; i--) {
+        //     for (int j = y; j <= 1000; j++) {
+        //         if (berth_break.find(j) != berth_break.end()) {
+        //             if (y + vessel_size > j) {
+        //                 flag = false;
+        //                 break;
+        //             }
+        //         }
+        //         if (space[i][j] > 0) {
+        //             flag = false;
+        //             break;
+        //         }
+        //     }
+        // }
         return false;
     }
     else if (quadrant == 4) {
@@ -378,6 +412,8 @@ int get_differ(int idx, int pos, int size) {
             idx_lb -= 1;
         }
     }
+    // cout << "br: " << br[idx_up] << " " << br[idx_lb] << ' ' << br[idx_up] - br[idx_lb] - size << endl;
+    // cout << "idx: " << idx_up << " " << idx_lb << endl;
     return br[idx_up] - br[idx_lb] - size;
 }
 
@@ -396,6 +432,7 @@ int generateCost3(vessel_info V){
             if (k_diff < dif) {dif = k_diff, idx = i;}
         }
     }
+    //cout << "dif: " << dif << endl; 
     return idx;
 }
 
@@ -432,6 +469,12 @@ void printPoint(vector<vector<pii>> a){
         }
 }
 
+void printMap(){
+    for (int i = 0; i < max_time + 1; ++i){
+        for (int j = 0; j < berth_length; ++j) cout << space[i][j] << ' ';
+        cout << endl;
+    }
+}
 
 void printMap1(){
     for (int j = 0; j < berth_length; ++j){
@@ -445,7 +488,9 @@ void process() {
     initLocation();
     max_time = vessel[0].arrival_time;
     for (int k = 0; k < vessel.size(); ++k) {
+        cout << "process the vessel: " << k + 1 << endl;
         deleteVector();
+        cout << "==================================" << endl;
         avt = vessel[k].arrival_time;
         for (int i = 0; i <= max_time; ++i) {
             for (int j = 0; j <= berth_length; ++j) {
@@ -453,32 +498,51 @@ void process() {
                 assignClass(res,i,j);
             }
         } 
+        //cout << "bugs here1" << endl;
+        // cout << "Class3:" << endl;
+        // printPoint(Class3);
+        // cout << "Class1:" << endl;
+        // printPoint(Class1);
         generatorPoint();
+        //cout << "bugs here2" << endl;
         Class3Intesection();
+        //cout << "bugs here3" << endl;
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < Class1[i].size(); ++j) {
                 bool check_loc = checkLocation(Class1[i][j],i+1,vessel[k].size,vessel[k].processing_time);
+                // cout << check_loc << " " << i + 1 << " " << Class1[i][j].first << " " << Class1[i][j].second << endl;
                 if (check_loc) {
                     feasible_solution.push_back(Class1[i][j]);
                     feasible_direction.push_back(i+1);
                 } 
             } 
         }
-        for (int i = 0; i < 4; ++i) {
-            for (int j = 0; j < Class1new[i].size(); ++j) {
-                bool check_loc = checkLocation(Class1new[i][j],i+1,vessel[k].size,vessel[k].processing_time);
-                if (check_loc) {
-                    feasible_solution.push_back(Class1new[i][j]);
-                    feasible_direction.push_back(i+1);
-                } 
-            } 
-        }
+        //cout << "bugs here4" << endl;
+        // for (int i = 0; i < 4; ++i) {
+        //     for (int j = 0; j < Class1new[i].size(); ++j) {
+        //         bool check_loc = checkLocation(Class1new[i][j],i+1,vessel[k].size,vessel[k].processing_time);
+        //         // cout << check_loc << " " << i + 1 << " " << Class1new[i][j].first << " " << Class1new[i][j].second << endl;
+        //         if (check_loc) {
+        //             feasible_solution.push_back(Class1new[i][j]);
+        //             feasible_direction.push_back(i+1);
+        //         } 
+        //     } 
+        // }
+        // for (int i = 0; i < feasible_solution.size(); ++i){
+        //     cout << feasible_solution[i].first << ' ' << feasible_solution[i].second << ' ' << feasible_direction[i] << endl;
+        // }
         int idx = generateCost3(vessel[k]);
+        
+        //cout << "Set vessel at:" << idx << " " << feasible_solution[idx].first << " " << feasible_solution[idx].second << endl;
+        
         fillColor(idx,vessel[k]);
         vessel[k].mooring_time = feasible_solution[idx].first;
         if (feasible_direction[idx] == 1) vessel[k].position = feasible_solution[idx].second - vessel[k].size;
         else vessel[k].position = feasible_solution[idx].second;
+        //printMap1();
     }
+    //printMap1();
+    cout << "cost: " << calCost() << endl;
 }
 
 void write(string fileName){
@@ -489,7 +553,7 @@ void write(string fileName){
     for (int i = 0; i < vessel.size(); ++i){
         ofs << vessel[i].index << ' ' << vessel[i].mooring_time << ' ' << vessel[i].position << endl;
     }
-    cout << "Cost: " << calCost() << endl;
+    cout << "Cost: " << calCost();
     ofs.close();
 }
 
