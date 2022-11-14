@@ -301,37 +301,9 @@ bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
         }
     }
     else if (quadrant == 2) {
-        // for (int i = x; i > x - time; --i) {
-        //     for (int j = y; j > y - vessel_size; j--) {
-        //         if (berth_break.find(j) != berth_break.end()) {
-        //             if (y - vessel_size < j) {
-        //                 flag = false;
-        //                 break;
-        //             }
-        //         }
-        //         if (space[i][j] > 0) {
-        //             flag = false;
-        //             break;
-        //         }
-        //     }
-        // }
         return false;
     }
     else if (quadrant == 3) {
-        // for (int i = x; i > x - time; i--) {
-        //     for (int j = y; j <= 1000; j++) {
-        //         if (berth_break.find(j) != berth_break.end()) {
-        //             if (y + vessel_size > j) {
-        //                 flag = false;
-        //                 break;
-        //             }
-        //         }
-        //         if (space[i][j] > 0) {
-        //             flag = false;
-        //             break;
-        //         }
-        //     }
-        // }
         return false;
     }
     else if (quadrant == 4) {
@@ -406,8 +378,6 @@ int get_differ(int idx, int pos, int size) {
             idx_lb -= 1;
         }
     }
-    cout << "br: " << br[idx_up] << " " << br[idx_lb] << ' ' << br[idx_up] - br[idx_lb] - size << endl;
-    cout << "idx: " << idx_up << " " << idx_lb << endl;
     return br[idx_up] - br[idx_lb] - size;
 }
 
@@ -426,7 +396,6 @@ int generateCost3(vessel_info V){
             if (k_diff < dif) {dif = k_diff, idx = i;}
         }
     }
-    cout << "dif: " << dif << endl; 
     return idx;
 }
 
@@ -463,12 +432,6 @@ void printPoint(vector<vector<pii>> a){
         }
 }
 
-void printMap(){
-    for (int i = 0; i < max_time + 1; ++i){
-        for (int j = 0; j < berth_length; ++j) cout << space[i][j] << ' ';
-        cout << endl;
-    }
-}
 
 void printMap1(){
     for (int j = 0; j < berth_length; ++j){
@@ -490,16 +453,11 @@ void process() {
                 assignClass(res,i,j);
             }
         } 
-        cout << "Class3:" << endl;
-        printPoint(Class3);
-        cout << "Class1:" << endl;
-        printPoint(Class1);
         generatorPoint();
         Class3Intesection();
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < Class1[i].size(); ++j) {
                 bool check_loc = checkLocation(Class1[i][j],i+1,vessel[k].size,vessel[k].processing_time);
-                // cout << check_loc << " " << i + 1 << " " << Class1[i][j].first << " " << Class1[i][j].second << endl;
                 if (check_loc) {
                     feasible_solution.push_back(Class1[i][j]);
                     feasible_direction.push_back(i+1);
@@ -509,28 +467,18 @@ void process() {
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < Class1new[i].size(); ++j) {
                 bool check_loc = checkLocation(Class1new[i][j],i+1,vessel[k].size,vessel[k].processing_time);
-                // cout << check_loc << " " << i + 1 << " " << Class1new[i][j].first << " " << Class1new[i][j].second << endl;
                 if (check_loc) {
                     feasible_solution.push_back(Class1new[i][j]);
                     feasible_direction.push_back(i+1);
                 } 
             } 
         }
-        // for (int i = 0; i < feasible_solution.size(); ++i){
-        //     cout << feasible_solution[i].first << ' ' << feasible_solution[i].second << ' ' << feasible_direction[i] << endl;
-        // }
         int idx = generateCost3(vessel[k]);
-        
-        //cout << "Set vessel at:" << idx << " " << feasible_solution[idx].first << " " << feasible_solution[idx].second << endl;
-        
         fillColor(idx,vessel[k]);
         vessel[k].mooring_time = feasible_solution[idx].first;
         if (feasible_direction[idx] == 1) vessel[k].position = feasible_solution[idx].second - vessel[k].size;
         else vessel[k].position = feasible_solution[idx].second;
-        //printMap1();
     }
-    //printMap1();
-    cout << "cost: " << calCost() << endl;
 }
 
 void write(string fileName){
@@ -541,14 +489,14 @@ void write(string fileName){
     for (int i = 0; i < vessel.size(); ++i){
         ofs << vessel[i].index << ' ' << vessel[i].mooring_time << ' ' << vessel[i].position << endl;
     }
-    cout << "Cost: " << calCost();
+    cout << "Cost: " << calCost() << endl;
     ofs.close();
 }
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "input2.txt";
-    fileOUT = "output2.txt";
+    fileIN = "input4.txt";
+    fileOUT = "output4.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
