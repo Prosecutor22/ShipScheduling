@@ -640,19 +640,19 @@ void swapPhase(vessel_info& V1,vessel_info& V2, pair<int,int> V1_new, pair<int,i
             space[i][j] = 0;
         }
     }   
-    cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+    // cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
     for (int i = V2.mooring_time; i < V2.mooring_time + V2.processing_time; ++i) {
         for (int j = V2.position; j <= V2.position + V2.size; ++j) {
             space[i][j] = 0;
         }
     }   
-    cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    // cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
     V1.mooring_time = V2_new.first;
     V2.mooring_time = V1_new.first;
     V1.position = V2_new.second;
     V2.position = V1_new.second;
     
-    cout << V1.mooring_time << " " << V2.mooring_time << "  " << V1.position << "  " << V2.position << endl;
+    // cout << V1.mooring_time << " " << V2.mooring_time << "  " << V1.position << "  " << V2.position << endl;
     
     for (int i = V1.mooring_time; i < V1.mooring_time + V1.processing_time; ++i) {
         for (int j = V1.position; j <= V1.position + V1.size; ++j) {
@@ -660,13 +660,13 @@ void swapPhase(vessel_info& V1,vessel_info& V2, pair<int,int> V1_new, pair<int,i
         }
     }   
     
-    cout << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
+    // cout << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
     for (int i = V2.mooring_time; i < V2.mooring_time + V2.processing_time; ++i) {
         for (int j = V2.position; j <= V2.position + V2.size; ++j) {
             space[i][j] = V2.index;
         }
     }   
-    cout << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
+    // cout << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
 }
 
 void searchPhase(){
@@ -687,7 +687,7 @@ void searchPhase(){
             int r_cost = checkSwapPhase(vessel[i],vessel[j],V1_save,V2_save); 
             if (r_cost != -1) {
                 if (r_cost < maxReduceCost){ 
-                    cout << "maxReduceCost: " << maxReduceCost << endl;
+                    // cout << "maxReduceCost: " << maxReduceCost << endl;
                     maxReduceCost = r_cost;
                     locationReduceCost = j;
                     V1_new = V1_save;
@@ -697,10 +697,10 @@ void searchPhase(){
             j++;
         }
         if (maxReduceCost != INT_MAX) {
-            cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-            cout << V1_new.first << " " << V2_new.second << "  " << V1_new.first << "  " << V2_new.second << endl;   
+            // cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+            // cout << V1_new.first << " " << V2_new.second << "  " << V1_new.first << "  " << V2_new.second << endl;   
             swapPhase(vessel[i],vessel[locationReduceCost],V1_new,V2_new);
-            cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+            // cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
         }
         
     }
@@ -709,8 +709,8 @@ void searchPhase(){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "pattern_input/input4.txt";
-    fileOUT = "pattern_output/output4.txt";
+    fileIN = "pattern_input/input5.txt";
+    fileOUT = "pattern_output/output5.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
