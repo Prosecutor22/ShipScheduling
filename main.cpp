@@ -152,15 +152,14 @@ void generatorPoint() {
             }
             else if (i == 2){
                 int flag = 1;
-                cout << x << ' ' << y << " ==== bugs0 =====" << endl;
+                //cout << x << ' ' << y << " ==== bugs0 =====" << endl;
                 while (y < berth_length && space[x][y] == 0){
                     y++;
                     
                     if (berth_break.find(y) != berth_break.end()) {flag = 0; break;}
                 }
-                cout << x << ' ' << y << " ==== bugs0 =====" << endl;
                 Class1[3].push_back({x, y - flag});
-                cout << Class1[3].size() << endl;
+                //cout << x << ' ' << y << " ==== bugs0 =====" << endl;
                 Class3_generator[2].push_back({x, y - flag});
             }
             else {
@@ -542,7 +541,7 @@ void process() {
         //printMap1();
     }
     //printMap1();
-    cout << "cost: " << calCost() << endl;
+    //cout << "cost: " << calCost() << endl;
 }
 
 void write(string fileName){
@@ -553,14 +552,14 @@ void write(string fileName){
     for (int i = 0; i < vessel.size(); ++i){
         ofs << vessel[i].index << ' ' << vessel[i].mooring_time << ' ' << vessel[i].position << endl;
     }
-    cout << "Cost: " << calCost();
+    cout << "Cost: " << calCost() << endl;
     ofs.close();
 }
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "input4.txt";
-    fileOUT = "output4.txt";
+    fileIN = "input5.txt";
+    fileOUT = "output5.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
