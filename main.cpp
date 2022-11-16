@@ -603,10 +603,12 @@ pair<int,int> checkSwapVessel(vessel_info V1, vessel_info V2) {
             bool flag = true;
             for (int k = 0; k <= V2.processing_time; k++) {
                 for (int t = 0; t <= V2.size; t++) {
-                    if (space[k][t] != V1.index || space[k][t] != 0) {
+                    if (space[i + k][j + t] != V1.index && space[i + k][j + t] != 0) {
                         flag = false;
+                        break;
                     } 
                 }   
+                if (flag == false) break;
             }
             if (flag == true) {
                 int costNew = V2.arrival_time - i;
@@ -625,9 +627,10 @@ int checkSwapPhase(vessel_info V1,vessel_info V2,pair<int,int>& V1_save, pair<in
     
     V2_save = checkSwapVessel(V1,V2);
     V1_save = checkSwapVessel(V2,V1);
-    if (V2_save.first == -1 || V1_save.first == -1) {
-        return -1;
-    }
+    // if (V2_save.first == -1 || V1_save.first == -1) {
+    //     return -1;
+    // }
+    if (V2_save.first < 0 || V2_save.second < 0 || V1_save.first < 0 || V1_save.second < 0) return -1;
     return (V2_save.first - V2.arrival_time) * V2.weight + (V1_save.first - V1.arrival_time) * V1.weight;
 }
 
@@ -637,27 +640,33 @@ void swapPhase(vessel_info& V1,vessel_info& V2, pair<int,int> V1_new, pair<int,i
             space[i][j] = 0;
         }
     }   
+    cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
     for (int i = V2.mooring_time; i < V2.mooring_time + V2.processing_time; ++i) {
         for (int j = V2.position; j <= V2.position + V2.size; ++j) {
             space[i][j] = 0;
         }
     }   
-    
+    cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
     V1.mooring_time = V2_new.first;
     V2.mooring_time = V1_new.first;
     V1.position = V2_new.second;
     V2.position = V1_new.second;
+    
+    cout << V1.mooring_time << " " << V2.mooring_time << "  " << V1.position << "  " << V2.position << endl;
     
     for (int i = V1.mooring_time; i < V1.mooring_time + V1.processing_time; ++i) {
         for (int j = V1.position; j <= V1.position + V1.size; ++j) {
             space[i][j] = V1.index;
         }
     }   
+    
+    cout << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
     for (int i = V2.mooring_time; i < V2.mooring_time + V2.processing_time; ++i) {
         for (int j = V2.position; j <= V2.position + V2.size; ++j) {
             space[i][j] = V2.index;
         }
     }   
+    cout << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
 }
 
 void searchPhase(){
@@ -688,8 +697,12 @@ void searchPhase(){
             j++;
         }
         if (maxReduceCost != INT_MAX) {
+            cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+            cout << V1_new.first << " " << V2_new.second << "  " << V1_new.first << "  " << V2_new.second << endl;   
             swapPhase(vessel[i],vessel[locationReduceCost],V1_new,V2_new);
+            cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
         }
+        
     }
     // printMap1();
 }
