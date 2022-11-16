@@ -30,7 +30,7 @@ int calCost(){
 bool cmp1(vessel_info &V1, vessel_info &V2){
     if (V1.arrival_time < V2.arrival_time) return 1;
     else if (V1.arrival_time == V2.arrival_time) {
-        return V1.weight < V2.weight;
+        return V1.weight > V2.weight;
     }
     else return 0;
 }
@@ -67,7 +67,7 @@ void deleteVector() {
     feasible_prop.clear();
     Class3.clear();
     Class3.resize(4);
-    Class3_generator.clear();
+    Class3_generator.clear(); 
     Class3_generator.resize(4);
     cul_sum.clear();
     feasible_direction.clear();
@@ -205,7 +205,6 @@ void assignClass(string res, int i, int j) {
         }
     }
 }
-
 
 void sortVessel(int opt) {
     if (opt == 1) sort(vessel.begin(), vessel.end(), cmp1);
@@ -558,8 +557,8 @@ void write(string fileName){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "input5.txt";
-    fileOUT = "output5.txt";
+    fileIN = "pattern_input/input5.txt";
+    fileOUT = "pattern_output/output5.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
