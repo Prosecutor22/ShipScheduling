@@ -1,10 +1,10 @@
 import random
 
-num_test = 6
-berth_length = [100,150,200,1000]
-break_num = [4,6,8,20]
-num_vessel = [16,75,100,250]
-max_arrival_time = [50,75,100,600]
+num_test = 7
+berth_length = [100,150,200,1000,1200]
+break_num = [4,6,8,20,40]
+num_vessel = [16,75,100,200,250]
+max_arrival_time = [50,75,100,600,800]
 processing_max = 50
 weight_max = 10
 
