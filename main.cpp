@@ -67,9 +67,8 @@ int avt;
 void deleteVector() {
     Class1.clear();
     Class1.resize(4);
-    //Class1new.clear();
-    // Class1new.erase(Class1new.begin(), Class1new.end());
-    //Class1new.resize(4);
+    Class1new.clear();
+    Class1new.resize(4);
     feasible_solution.clear();
     feasible_prop.clear();
     Class3.clear();
@@ -159,14 +158,14 @@ void generatorPoint() {
             }
             else if (i == 2){
                 int flag = 1;
-                //cout << x << ' ' << y << " ==== bugs0 =====" << endl;
+
                 while (y < berth_length && space[x][y] == 0){
                     y++;
                     
                     if (berth_break.find(y) != berth_break.end()) {flag = 0; break;}
                 }
                 Class1[3].push_back({x, y - flag});
-                //cout << x << ' ' << y << " ==== bugs0 =====" << endl;
+                
                 Class3_generator[2].push_back({x, y - flag});
             }
             else {
@@ -197,7 +196,15 @@ void assignClass(string res, int i, int j) {
             }
         }        
         if (cls == 1) Class1[idx].push_back({i,j});
-        else Class3[idx].push_back({i,j});
+        else {
+            Class3[idx].push_back({i,j});
+            if (berth_break.find(j) != berth_break.end()){
+                if (res == "0111") Class1[1].push_back({i, j});
+                else if (res == "1011") Class1[0].push_back({i, j});
+                else if (res == "1101") Class1[3].push_back({i, j});
+                else Class1[2].push_back({i, j});
+            }
+        }
     }
     if (berth_break.find(j) != berth_break.end()){
         if (res == "1001" || res == "1011"){
@@ -272,7 +279,7 @@ void read(string fileName){
     }
     br.push_back(berth_length);
 }
-// tao diem moi tu 2 duong giao class 3
+
 void Class3Intesection(){
     for (int i = 0; i < Class3[3].size(); ++i)
         for (int j = 0; j < Class3[1].size(); ++j){
@@ -286,7 +293,6 @@ void Class3Intesection(){
         }
 }
 
-//check location
 
 
 bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
@@ -312,38 +318,37 @@ bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
         }
     }
     else if (quadrant == 2) {
-        // for (int i = x; i > x - time; --i) {
-        //     for (int j = y; j > y - vessel_size; j--) {
-        //         if (berth_break.find(j) != berth_break.end()) {
-        //             if (y - vessel_size < j) {
-        //                 flag = false;
-        //                 break;
-        //             }
-        //         }
-        //         if (space[i][j] > 0) {
-        //             flag = false;
-        //             break;
-        //         }
-        //     }
-        // }
-        return false;
+        for (int i = x; i > x - time; --i) {
+            for (int j = y; j > y - vessel_size; j--) {
+                if (berth_break.find(j) != berth_break.end()) {
+                    if (y - vessel_size < j) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (space[i][j] > 0) {
+                    flag = false;
+                    break;
+                }
+            }
+        }
     }
     else if (quadrant == 3) {
-        // for (int i = x; i > x - time; i--) {
-        //     for (int j = y; j <= 1000; j++) {
-        //         if (berth_break.find(j) != berth_break.end()) {
-        //             if (y + vessel_size > j) {
-        //                 flag = false;
-        //                 break;
-        //             }
-        //         }
-        //         if (space[i][j] > 0) {
-        //             flag = false;
-        //             break;
-        //         }
-        //     }
-        // }
-        return false;
+        for (int i = x; i > x - time; i--) {
+            if (y + vessel_size > berth_length) return false;
+            for (int j = y + 1; j <= y + vessel_size; ++j) {
+                if (berth_break.find(j) != berth_break.end()) {
+                    if (y + vessel_size > j) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (space[i][j] > 0) {
+                    flag = false;
+                    break;
+                }
+            }
+        }
     }
     else if (quadrant == 4) {
         for (int i = x; i < x + time; ++i) {
@@ -365,7 +370,7 @@ bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
     return flag;
 }
 
-//generate_cost
+
 int generateCost(vessel_info V){
     int sum = 0;
     for (int i = 0; i < feasible_solution.size(); ++i){
@@ -395,7 +400,7 @@ int generateCost(vessel_info V){
     }
     return idx;
 }
-//
+
 
 int generateCost2(vessel_info V){
     int idx = 0, min = -1, k;
@@ -417,14 +422,12 @@ int get_differ(int idx, int pos, int size) {
             idx_lb -= 1;
         }
     }
-    // cout << "br: " << br[idx_up] << " " << br[idx_lb] << ' ' << br[idx_up] - br[idx_lb] - size << endl;
-    // cout << "idx: " << idx_up << " " << idx_lb << endl;
     return br[idx_up] - br[idx_lb] - size;
 }
 
 int generateCost3(vessel_info V){
     int idx = 0, min = -1, k, dif;
-    //
+
     min = V.weight*(feasible_solution[0].first-V.arrival_time);
     
     dif = get_differ(0,feasible_solution[0].second,V.size);
@@ -437,7 +440,7 @@ int generateCost3(vessel_info V){
             if (k_diff < dif) {dif = k_diff, idx = i;}
         }
     }
-    //cout << "dif: " << dif << endl; 
+     
     return idx;
 }
 
@@ -454,6 +457,23 @@ void fillColor(int idx,struct vessel_info V) {
                 space[i][j] = V.index;       
             }
         }
+        if (x + time_ > max_time) max_time = x + time_;
+    }
+    else if (direct == 2){
+        for (int i = x; i > x - time_; --i) {
+            for (int j = y - 1; j >= y - vessel_size; j--) {
+                space[i][j] = V.index;       
+            }
+        }
+        if (time_ >= max_time) max_time = time_;
+    }
+    else if (direct == 3){
+        if (time_ >= max_time) max_time = time_;
+        for (int i = x; i > x - time_; --i) {
+            for (int j = y; j <= y + vessel_size; ++j) {
+                space[i][j] = V.index;
+            }
+        }
     }
     else {
         for (int i = x; i < x + time_; ++i) {
@@ -461,8 +481,9 @@ void fillColor(int idx,struct vessel_info V) {
                 space[i][j] = V.index;
             }
         }
+        if (x + time_ > max_time) max_time = x + time_;
     }
-    if (x + time_ > max_time) max_time = x + time_;
+    
 }
 
 void printPoint(vector<vector<pii>> a){
@@ -503,42 +524,32 @@ void process() {
                 assignClass(res,i,j);
             }
         } 
-        //cout << "bugs here1" << endl;
-        // cout << "Class3:" << endl;
-        // printPoint(Class3);
-        // cout << "Class1:" << endl;
-        // printPoint(Class1);
         generatorPoint();
-        //cout << "bugs here2" << endl;
         Class3Intesection();
-        //cout << "bugs here3" << endl;
+
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < Class1[i].size(); ++j) {
                 bool check_loc = checkLocation(Class1[i][j],i+1,vessel[k].size,vessel[k].processing_time);
-                // cout << check_loc << " " << i + 1 << " " << Class1[i][j].first << " " << Class1[i][j].second << endl;
+
                 if (check_loc) {
                     feasible_solution.push_back(Class1[i][j]);
                     feasible_direction.push_back(i+1);
                 } 
             } 
         }
-        //cout << "bugs here4" << endl;
-        // for (int i = 0; i < 4; ++i) {
-        //     for (int j = 0; j < Class1new[i].size(); ++j) {
-        //         bool check_loc = checkLocation(Class1new[i][j],i+1,vessel[k].size,vessel[k].processing_time);
-        //         // cout << check_loc << " " << i + 1 << " " << Class1new[i][j].first << " " << Class1new[i][j].second << endl;
-        //         if (check_loc) {
-        //             feasible_solution.push_back(Class1new[i][j]);
-        //             feasible_direction.push_back(i+1);
-        //         } 
-        //     } 
-        // }
-        // for (int i = 0; i < feasible_solution.size(); ++i){
-        //     cout << feasible_solution[i].first << ' ' << feasible_solution[i].second << ' ' << feasible_direction[i] << endl;
-        // }
+
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < Class1new[i].size(); ++j) {
+                bool check_loc = checkLocation(Class1new[i][j],i+1,vessel[k].size,vessel[k].processing_time);
+                if (check_loc) {
+                    feasible_solution.push_back(Class1new[i][j]);
+                    feasible_direction.push_back(i+1);
+                } 
+            } 
+        }
+
         int idx = generateCost3(vessel[k]);
         
-        //cout << "Set vessel at:" << idx << " " << feasible_solution[idx].first << " " << feasible_solution[idx].second << endl;
         
         fillColor(idx,vessel[k]);
         vessel[k].mooring_time = feasible_solution[idx].first;
@@ -549,8 +560,6 @@ void process() {
         if (vessel[k].position < br[pos_check]) vessel[k].break_pos = pos_check - 1;
         else vessel[k].break_pos = pos_check;
     }
-    //printMap1();
-    //cout << "cost: " << calCost() << endl;
 }
 
 void write(string fileName){
@@ -598,10 +607,10 @@ pair<int,int> checkSwapVessel(vessel_info V1, vessel_info V2) {
     pRight = ptRight;
     pBottom = ptBottom;
     
-    for (int i = pLeft; i <= pRight - V2.processing_time; ++i) {
+    for (int i = pLeft; i < pRight - V2.processing_time; ++i) {
         for (int j = pUp; j <= pBottom - V2.size; ++j) {
             bool flag = true;
-            for (int k = 0; k <= V2.processing_time; k++) {
+            for (int k = 0; k < V2.processing_time; k++) {
                 for (int t = 0; t <= V2.size; t++) {
                     if (space[i + k][j + t] != V1.index && space[i + k][j + t] != 0) {
                         flag = false;
@@ -627,9 +636,7 @@ int checkSwapPhase(vessel_info V1,vessel_info V2,pair<int,int>& V1_save, pair<in
     
     V2_save = checkSwapVessel(V1,V2);
     V1_save = checkSwapVessel(V2,V1);
-    // if (V2_save.first == -1 || V1_save.first == -1) {
-    //     return -1;
-    // }
+
     if (V2_save.first < 0 || V2_save.second < 0 || V1_save.first < 0 || V1_save.second < 0) return -1;
     return (V2_save.first - V2.arrival_time) * V2.weight + (V1_save.first - V1.arrival_time) * V1.weight;
 }
@@ -640,19 +647,18 @@ void swapPhase(vessel_info& V1,vessel_info& V2, pair<int,int> V1_new, pair<int,i
             space[i][j] = 0;
         }
     }   
-    // cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+
     for (int i = V2.mooring_time; i < V2.mooring_time + V2.processing_time; ++i) {
         for (int j = V2.position; j <= V2.position + V2.size; ++j) {
             space[i][j] = 0;
         }
     }   
-    // cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-    V1.mooring_time = V2_new.first;
-    V2.mooring_time = V1_new.first;
-    V1.position = V2_new.second;
-    V2.position = V1_new.second;
-    
-    // cout << V1.mooring_time << " " << V2.mooring_time << "  " << V1.position << "  " << V2.position << endl;
+
+    V1.mooring_time = V1_new.first;
+    V2.mooring_time = V2_new.first;
+    V1.position = V1_new.second;
+    V2.position = V2_new.second;
+
     
     for (int i = V1.mooring_time; i < V1.mooring_time + V1.processing_time; ++i) {
         for (int j = V1.position; j <= V1.position + V1.size; ++j) {
@@ -660,13 +666,11 @@ void swapPhase(vessel_info& V1,vessel_info& V2, pair<int,int> V1_new, pair<int,i
         }
     }   
     
-    // cout << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
     for (int i = V2.mooring_time; i < V2.mooring_time + V2.processing_time; ++i) {
         for (int j = V2.position; j <= V2.position + V2.size; ++j) {
             space[i][j] = V2.index;
         }
     }   
-    // cout << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzz" << endl;
 }
 
 void searchPhase(){
@@ -687,7 +691,6 @@ void searchPhase(){
             int r_cost = checkSwapPhase(vessel[i],vessel[j],V1_save,V2_save); 
             if (r_cost != -1) {
                 if (r_cost < maxReduceCost){ 
-                    // cout << "maxReduceCost: " << maxReduceCost << endl;
                     maxReduceCost = r_cost;
                     locationReduceCost = j;
                     V1_new = V1_save;
@@ -697,14 +700,10 @@ void searchPhase(){
             j++;
         }
         if (maxReduceCost != INT_MAX) {
-            // cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-            // cout << V1_new.first << " " << V2_new.second << "  " << V1_new.first << "  " << V2_new.second << endl;   
             swapPhase(vessel[i],vessel[locationReduceCost],V1_new,V2_new);
-            // cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
         }
         
     }
-    // printMap1();
 }
 
 int main(){
