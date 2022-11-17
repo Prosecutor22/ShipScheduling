@@ -1,14 +1,14 @@
 import random
 
 num_test = 7
-berth_length = [100,150,200,1000,1200]
-break_num = [4,6,8,20,40]
-num_vessel = [16,75,100,200,300]
-max_arrival_time = [50,75,100,600,800]
+berth_length = [500]
+break_num = [20]
+num_vessel = [200]
+max_arrival_time = [600]
 processing_max = 50
 weight_max = 10
 
-for i in range(2,num_test):
+for i in range(2,3):
     name_file = f"input{i}.txt"
     with open(name_file,'w') as f:
         f.write("%  Berth length\n")   
@@ -17,7 +17,7 @@ for i in range(2,num_test):
         f.write('\n')
         berth = random.sample(range(10,berth_length[j]),break_num[j])
         berth = sorted(berth)
-        f.write("\n")
+        f.write("% Berth breaks\n")
         for ele in berth:
             f.write(str(ele) + '\n')
         f.write('\n')
@@ -28,6 +28,7 @@ for i in range(2,num_test):
                 continue
             max_dis = max(max_dis,berth[k] - berth[k-1])
         max_dis = max(max_dis,berth_length[j] - berth[len(berth) - 1])
+        f.write("% Vessel index, size, arrival time, processing time, weight (=1 as default) \n")
         for k in range(1,num_vessel[j]+1):
             arrival_t = random.randint(0,max_arrival_time[j])
             size = random.randint(1,max_dis) 

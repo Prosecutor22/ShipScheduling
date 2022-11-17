@@ -20,8 +20,8 @@ struct vessel_info{
 
 vector<vessel_info> vessel;
 
-int calCost(){
-    int sum = 0;
+long long calCost(){
+    long long sum = 0;
     for (int i = 0; i < vessel.size(); ++i){
         sum += vessel[i].weight*(vessel[i].mooring_time - vessel[i].arrival_time);
     }
@@ -67,7 +67,7 @@ int avt;
 void deleteVector() {
     Class1.clear();
     Class1.resize(4);
-    Class1new.clear();
+    //Class1new.clear();
     Class1new.resize(4);
     feasible_solution.clear();
     feasible_prop.clear();
@@ -85,7 +85,7 @@ void deleteVector() {
 //=============================
 int di[4] = {0,-1,-1,0};
 int dj[4] = {-1,-1,0,0};
-int space[2001][2001];
+int space[5001][501];
 map <string,pair<int,int>> dict;
 void create_dict() {
     dict["1000"] = {1,0};
@@ -514,9 +514,10 @@ void process() {
     initLocation();
     max_time = vessel[0].arrival_time;
     for (int k = 0; k < vessel.size(); ++k) {
-        cout << "process the vessel: " << k + 1 << endl;
+        // cout << max_time << endl;
+        // cout << "process the vessel: " << k + 1 << endl;
         deleteVector();
-        cout << "==================================" << endl;
+        // cout << "==================================" << endl;
         avt = vessel[k].arrival_time;
         for (int i = avt; i <= max_time; ++i) {
             for (int j = 0; j <= berth_length; ++j) {
@@ -676,6 +677,7 @@ void swapPhase(vessel_info& V1,vessel_info& V2, pair<int,int> V1_new, pair<int,i
 void searchPhase(){
     sort(vessel.begin(),vessel.end(),cmp3);
     for (int i = 0; i < vessel.size() - 1; ++i) {
+        
         if (vessel[i].mooring_time == 0) continue;
         int j = i + 1;
         int maxReduceCost = INT_MAX;
@@ -690,7 +692,7 @@ void searchPhase(){
             pair<int,int> V2_save;
             int r_cost = checkSwapPhase(vessel[i],vessel[j],V1_save,V2_save); 
             if (r_cost != -1) {
-                if (r_cost < maxReduceCost){ 
+                if (r_cost < maxReduceCost && r_cost > 0){ 
                     maxReduceCost = r_cost;
                     locationReduceCost = j;
                     V1_new = V1_save;
@@ -708,8 +710,8 @@ void searchPhase(){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "input6.txt";
-    fileOUT = "output6.txt";
+    fileIN = "TestSet1/input2.txt";
+    fileOUT = "Output1/input2.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
@@ -718,7 +720,7 @@ int main(){
     create_dict();
     process();
     cout << "=========: " << calCost() << endl;
-    searchPhase();
+    //searchPhase();
     sortVessel(2);
     write(fileOUT);
     end = std::chrono::system_clock::now();
