@@ -3,8 +3,8 @@ import random
 num_test = 6
 berth_length = [100,150,200,1000]
 break_num = [4,6,8,20]
-num_vessel = [16,75,100,200]
-max_arrival_time = [50,75,100,200]
+num_vessel = [16,75,100,250]
+max_arrival_time = [50,75,100,600]
 processing_max = 50
 weight_max = 10
 

@@ -296,7 +296,6 @@ void Class3Intesection(){
 
 
 bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
-
     int x = point.first;
     int y = point.second;
     bool flag = true;
@@ -318,6 +317,7 @@ bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
         }
     }
     else if (quadrant == 2) {
+        if (x < time) return false;
         for (int i = x; i > x - time; --i) {
             for (int j = y; j > y - vessel_size; j--) {
                 if (berth_break.find(j) != berth_break.end()) {
@@ -334,6 +334,7 @@ bool checkLocation(pii point, int quadrant, int vessel_size, int time) {
         }
     }
     else if (quadrant == 3) {
+        if (x < time) return false;
         for (int i = x; i > x - time; i--) {
             if (y + vessel_size > berth_length) return false;
             for (int j = y + 1; j <= y + vessel_size; ++j) {
@@ -514,6 +515,7 @@ void process() {
     initLocation();
     max_time = vessel[0].arrival_time;
     for (int k = 0; k < vessel.size(); ++k) {
+        if (max_time < vessel[k].arrival_time) max_time = vessel[k].arrival_time;
         cout << "process the vessel: " << k + 1 << endl;
         deleteVector();
         cout << "==================================" << endl;
@@ -708,8 +710,8 @@ void searchPhase(){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "pattern_input/input5.txt";
-    fileOUT = "pattern_output/output5.txt";
+    fileIN = "input5.txt";
+    fileOUT = "output5.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
