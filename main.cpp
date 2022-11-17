@@ -713,8 +713,8 @@ void searchPhase(){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "pattern_input/input4.txt";
-    fileOUT = "pattern_output/output4.txt";
+    fileIN = "input4.txt";
+    fileOUT = "output4.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
