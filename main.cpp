@@ -519,6 +519,7 @@ void process() {
         deleteVector();
         // cout << "==================================" << endl;
         avt = vessel[k].arrival_time;
+        if (max_time < avt) max_time = avt;
         for (int i = avt; i <= max_time; ++i) {
             for (int j = 0; j <= berth_length; ++j) {
                 string res = identifyClass(i,j);
@@ -553,9 +554,23 @@ void process() {
         
         
         fillColor(idx,vessel[k]);
-        vessel[k].mooring_time = feasible_solution[idx].first;
-        if (feasible_direction[idx] == 1) vessel[k].position = feasible_solution[idx].second - vessel[k].size;
-        else vessel[k].position = feasible_solution[idx].second;
+       
+        if (feasible_direction[idx] == 1) {
+            vessel[k].position = feasible_solution[idx].second - vessel[k].size;
+            vessel[k].mooring_time = feasible_solution[idx].first;
+        }
+        else if (feasible_direction[idx] == 2){
+            vessel[k].position = feasible_solution[idx].second - vessel[k].size;
+            vessel[k].mooring_time = feasible_solution[idx].first - vessel[k].processing_time;
+        }
+        else if (feasible_direction[idx] == 3){
+            vessel[k].position = feasible_solution[idx].second - vessel[k].size;
+            vessel[k].mooring_time = feasible_solution[idx].first - vessel[k].processing_time;
+        }
+        else {
+            vessel[k].mooring_time = feasible_solution[idx].first;
+            vessel[k].position = feasible_solution[idx].second;
+        } 
         //printMap1();
         int pos_check = lower_bound(br.begin(),br.end(),vessel[k].position) - br.begin();
         if (vessel[k].position < br[pos_check]) vessel[k].break_pos = pos_check - 1;
@@ -576,7 +591,7 @@ void write(string fileName){
 }
 
 pair<int,int> checkSwapVessel(vessel_info V1, vessel_info V2) {
-    int tempCost = -1;
+    int tempCost = INT_MAX;
     pair<int,int> save{-1,-1};
     int pLeft = V1.mooring_time;
     int pUp = V1.position;
@@ -596,19 +611,20 @@ pair<int,int> checkSwapVessel(vessel_info V1, vessel_info V2) {
         pUp--;
     }
     
-    while (ptRight < max_time && (space[ptRight][V1.position] == V1.index || space[ptRight][V1.position] == 0)) {
+    while (ptRight < max_time && (space[ptRight][pBottom] == V1.index || space[ptRight][pBottom] == 0)) {
         ptRight++;
     }
     
-    while (ptBottom < berth_length && (space[V1.mooring_time][ptBottom] == V1.index || space[V1.mooring_time][ptBottom] == 0)) {
+    while (ptBottom < berth_length && (space[pRight][ptBottom] == V1.index || space[pRight][ptBottom] == 0)) {
         if (berth_break.find(ptBottom) != berth_break.end()) break;
         ptBottom++;
     }
     
     pRight = ptRight;
     pBottom = ptBottom;
-    
-    for (int i = pLeft; i < max(pRight - V2.processing_time,0); ++i) {
+    if (pLeft < V2.arrival_time) pLeft = V2.arrival_time;
+    if (pRight - V2.processing_time < 0) return save;
+    for (int i = pLeft; i <= V1.mooring_time; ++i) {
         for (int j = pUp; j <= max(pBottom - V2.size,0); ++j) {
             bool flag = true;
             for (int k = 0; k < V2.processing_time; k++) {
@@ -621,8 +637,8 @@ pair<int,int> checkSwapVessel(vessel_info V1, vessel_info V2) {
                 if (flag == false) break;
             }
             if (flag == true) {
-                int costNew = V2.arrival_time - i;
-                if (costNew > tempCost) {
+                int costNew = i - V2.arrival_time;
+                if (costNew < tempCost) {
                     tempCost = costNew;
                     save = {i,j};
                 }
@@ -639,6 +655,7 @@ int checkSwapPhase(vessel_info V1,vessel_info V2,pair<int,int>& V1_save, pair<in
     V1_save = checkSwapVessel(V2,V1);
 
     if (V2_save.first < 0 || V2_save.second < 0 || V1_save.first < 0 || V1_save.second < 0) return -1;
+    cout << V2_save.first << ' ' << V2.mooring_time << ' ' << V1_save.first << ' ' << V1.mooring_time << endl;
     return (V2_save.first - V2.arrival_time) * V2.weight + (V1_save.first - V1.arrival_time) * V1.weight;
 }
 
@@ -685,6 +702,10 @@ void searchPhase(){
         pair<int,int> V1_new;
         pair<int,int> V2_new;
         while (j < vessel.size() && vessel[i].break_pos == vessel[j].break_pos && vessel[i].arrival_time > vessel[j].mooring_time) {
+            if (vessel[i].weight < vessel[j].weight){
+                ++j;
+                continue;
+            }
             if (vessel[j].mooring_time == 0) {
                 break;
             }
@@ -710,8 +731,8 @@ void searchPhase(){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "TestSet1/input2.txt";
-    fileOUT = "Output1/input2.txt";
+    fileIN = "input1_nguyen.txt";
+    fileOUT = "out.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
@@ -720,7 +741,7 @@ int main(){
     create_dict();
     process();
     cout << "=========: " << calCost() << endl;
-    //searchPhase();
+    searchPhase();
     sortVessel(2);
     write(fileOUT);
     end = std::chrono::system_clock::now();
