@@ -47,6 +47,12 @@ bool cmp3(vessel_info &V1, vessel_info &V2){
     return V1.break_pos < V2.break_pos;
 }
 
+bool cmp4(vessel_info &V1, vessel_info &V2){
+    if (V1.mooring_time == V2.mooring_time)
+        return V1.weight > V2.weight;
+    return V1.mooring_time > V2.mooring_time;
+}
+
 int berth_length;
 int m,n;
 set<int> berth_break;
@@ -655,7 +661,6 @@ int checkSwapPhase(vessel_info V1,vessel_info V2,pair<int,int>& V1_save, pair<in
     V1_save = checkSwapVessel(V2,V1);
 
     if (V2_save.first < 0 || V2_save.second < 0 || V1_save.first < 0 || V1_save.second < 0) return -1;
-    cout << V2_save.first << ' ' << V2.mooring_time << ' ' << V1_save.first << ' ' << V1.mooring_time << endl;
     return (V2_save.first - V2.arrival_time) * V2.weight + (V1_save.first - V1.arrival_time) * V1.weight;
 }
 
@@ -701,8 +706,8 @@ void searchPhase(){
         int locationReduceCost = -1;
         pair<int,int> V1_new;
         pair<int,int> V2_new;
-        while (j < vessel.size() && vessel[i].break_pos == vessel[j].break_pos && vessel[i].arrival_time > vessel[j].mooring_time) {
-            if (vessel[i].weight < vessel[j].weight){
+        while (j < vessel.size() && vessel[i].break_pos ==  vessel[j].break_pos ) {
+            if (vessel[i].weight < vessel[j].weight || vessel[i].arrival_time > vessel[j].mooring_time){
                 ++j;
                 continue;
             }
@@ -731,8 +736,8 @@ void searchPhase(){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "input1_nguyen.txt";
-    fileOUT = "out.txt";
+    fileIN = "TestSet1/input4.txt";
+    fileOUT = "Output1/output4.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
