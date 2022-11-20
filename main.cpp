@@ -556,25 +556,25 @@ void process() {
             } 
         }
 
-        int idx = generateCost3(vessel[k]);
+        int idx = generateCost(vessel[k]);
         
         
         fillColor(idx,vessel[k]);
        
         if (feasible_direction[idx] == 1) {
             vessel[k].position = feasible_solution[idx].second - vessel[k].size;
-            vessel[k].mooring_time = feasible_solution[idx].first;
+            vessel[k].mooring_time = max(feasible_solution[idx].first,vessel[k].arrival_time);
         }
         else if (feasible_direction[idx] == 2){
             vessel[k].position = feasible_solution[idx].second - vessel[k].size;
-            vessel[k].mooring_time = feasible_solution[idx].first - vessel[k].processing_time;
+            vessel[k].mooring_time = max(feasible_solution[idx].first - vessel[k].processing_time,vessel[k].arrival_time);
         }
         else if (feasible_direction[idx] == 3){
             vessel[k].position = feasible_solution[idx].second - vessel[k].size;
-            vessel[k].mooring_time = feasible_solution[idx].first - vessel[k].processing_time;
+            vessel[k].mooring_time = max(feasible_solution[idx].first - vessel[k].processing_time,vessel[k].arrival_time);
         }
         else {
-            vessel[k].mooring_time = feasible_solution[idx].first;
+            vessel[k].mooring_time = max(feasible_solution[idx].first,vessel[k].arrival_time);
             vessel[k].position = feasible_solution[idx].second;
         } 
         //printMap1();
@@ -774,8 +774,8 @@ void searchPhaseAll(){
 
 int main(){
     string fileIN, fileOUT;
-    fileIN = "TestSet1/input5.txt";
-    fileOUT = "Output1/output5.txt";
+    fileIN = "TestSet2/input5.txt";
+    fileOUT = "Output2/output5.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
@@ -784,7 +784,10 @@ int main(){
     create_dict();
     process();
     cout << "=========: " << calCost() << endl;
-    searchPhase();
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = duration_cast<microseconds> (end - start).count() * pow(10, -6);
+    cout << "Time to processing: " << elapsed_seconds << "s\n";
+    searchPhaseAll();
     sortVessel(2);
     write(fileOUT);
     end = std::chrono::system_clock::now();
