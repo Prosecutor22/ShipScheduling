@@ -734,10 +734,48 @@ void searchPhase(){
     }
 }
 
+void searchPhaseAll(){
+    sort(vessel.begin(),vessel.end(),cmp4);
+    for (int i = 0; i < vessel.size() - 1; ++i) {
+        
+        if (vessel[i].mooring_time == 0) continue;
+        int j = i + 1;
+        int maxReduceCost = INT_MAX;
+        int locationReduceCost = -1;
+        pair<int,int> V1_new;
+        pair<int,int> V2_new;
+        while (j < vessel.size()) {
+            if (vessel[i].weight < vessel[j].weight || vessel[i].arrival_time > vessel[j].mooring_time){
+                ++j;
+                continue;
+            }
+            if (vessel[j].mooring_time == 0) {
+                break;
+            }
+            pair<int,int> V1_save;
+            pair<int,int> V2_save;
+            int r_cost = checkSwapPhase(vessel[i],vessel[j],V1_save,V2_save); 
+            if (r_cost != -1) {
+                if (r_cost < maxReduceCost && r_cost > 0){ 
+                    maxReduceCost = r_cost;
+                    locationReduceCost = j;
+                    V1_new = V1_save;
+                    V2_new = V2_save;
+                }
+            }
+            j++;
+        }
+        if (maxReduceCost != INT_MAX) {
+            swapPhase(vessel[i],vessel[locationReduceCost],V1_new,V2_new);
+        }
+        
+    }
+}
+
 int main(){
     string fileIN, fileOUT;
-    fileIN = "TestSet1/input4.txt";
-    fileOUT = "Output1/output4.txt";
+    fileIN = "TestSet1/input5.txt";
+    fileOUT = "Output1/output5.txt";
     std::chrono::time_point<std::chrono::system_clock> start, end;
     double elapsed_seconds;
     start = std::chrono::system_clock::now();
